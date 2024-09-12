@@ -1,0 +1,5 @@
+user viru
+topic readwrite test/topic0
+topic read test/topic1
+topic write test/topic2
+topic deny test/topic3
