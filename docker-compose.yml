@@ -1,0 +1,50 @@
+version: '3'
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto:1.6
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./data/testAcl1.file:/mosquitto/data/testAcl1.file
+      - ./data/testpwd.txt:/mosquitto/data/testpwd.txt
+      - ./data:/mosquitto/data
+      - ./log:/mosquitto/log
+      - ./config:/mosquitto/config
+    networks:
+      - mqtt-network
+  
+  mqtt-sub:
+    build:
+      context: ./sub
+      dockerfile: Dockerfile
+    container_name: mqtt-sub
+    depends_on:
+      - mqtt-broker
+    networks:
+      - mqtt-network
+  
+  mqtt-pub:
+    build:
+      context: ./pub
+      dockerfile: Dockerfile
+    container_name: mqtt-pub
+    depends_on:
+      - mqtt-broker
+      - mqtt-sub
+    networks:
+      - mqtt-network
+    environment:
+      - MQTT_TOPIC_ENV
+    entrypoint: [" ./publisher1"]
+  
+networks:
+  mqtt-network:
+    driver: bridge
+    external: true
+
+volume:
+  mosquitto_data:
+  mosquitto_log:
+  mosquitto_config:
